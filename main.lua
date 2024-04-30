@@ -1,6 +1,6 @@
 local columns = {
     { -- First row
-        {x = 50, y = 50, width = 200, height = 200, color = {1, 0, 0}}, -- Column 1 (Red)
+        {x = 50, y = 50, width = 200, height = 200, color = {1, 0.4, 0}}, -- Column 1 (Red)
         {x = 300, y = 50, width = 200, height = 200, color = {0, 1, 0}}, -- Column 2 (Green)
         {x = 550, y = 50, width = 200, height = 200, color = {0, 0, 1}}  -- Column 3 (Blue)
     },
@@ -28,9 +28,23 @@ local button = {
     text = "Exit"
 }
 
+local buttonClear = {
+    width = 200,
+    height = 50,
+    text = "Clear"
+}
+
+function clearBoard()
+    board = {}  -- Reset the board to clear all sprites
+end
+
 function love.load()
     button.x = (love.graphics.getWidth() - button.width) / 2
     button.y = love.graphics.getHeight() - button.height - 20
+
+    -- Calculate x and y coordinates for the "Clear" button
+    buttonClear.x = button.x + button.width + 20  -- 20 pixels gap between buttons
+    buttonClear.y = button.y
 
     crossSprite = love.graphics.newImage("sprites/cross.png")
     naughtSprite = love.graphics.newImage("sprites/naught.png")
@@ -38,27 +52,33 @@ end
 
 function love.mousepressed(x, y, btn, isTouch, presses)
     if btn == 1 then
-        for rowIndex, row in ipairs(columns) do
-            for columnIndex, column in ipairs(row) do
-                if x >= column.x and x <= column.x + column.width and y >= column.y and y <= column.y + column.height then
-                    -- Check if the column is empty
-                    if not board[rowIndex] then
-                        board[rowIndex] = {}
-                    end
-                    if not board[rowIndex][columnIndex] then
-                        board[rowIndex][columnIndex] = currentSprite
-                        currentSprite = (currentSprite == "cross") and "naught" or "cross"
+        -- Check if the click is within the "Clear" button's bounds
+        if x >= buttonClear.x and x <= buttonClear.x + buttonClear.width and y >= buttonClear.y and y <= buttonClear.y + buttonClear.height then
+            clearBoard()  -- Call clearBoard function to clear sprites
+        else
+        end
+        if btn == 1 then
+            for rowIndex, row in ipairs(columns) do
+                for columnIndex, column in ipairs(row) do
+                    if x >= column.x and x <= column.x + column.width and y >= column.y and y <= column.y + column.height then
+                        -- Check if the column is empty
+                        if not board[rowIndex] then
+                            board[rowIndex] = {}
+                        end
+                        if not board[rowIndex][columnIndex] then
+                            board[rowIndex][columnIndex] = currentSprite
+                            currentSprite = (currentSprite == "cross") and "naught" or "cross"
+                        end
                     end
                 end
             end
-        end
-        -- Handle button click to exit the game
-        if x >= button.x and x <= button.x + button.width and y >= button.y and y <= button.y + button.height then
-            love.event.quit()
+            -- Handle button click to exit the game
+            if x >= button.x and x <= button.x + button.width and y >= button.y and y <= button.y + button.height then
+                love.event.quit()
+            end
         end
     end
 end
-
 function love.draw()
     for rowIndex, row in ipairs(columns) do
         for columnIndex, column in ipairs(row) do
@@ -74,9 +94,14 @@ function love.draw()
             end
         end
     end
-
+    -- Exit
     love.graphics.setColor(0.1, 1.3, 3.1)
     love.graphics.rectangle("fill", button.x, button.y, button.width, button.height)
     love.graphics.setColor(0, 0, 0)
     love.graphics.print(button.text, button.x + 75, button.y + 10, 0, 2)
+    -- Draw the "Clear" button
+    love.graphics.setColor(0.1, 1.3, 3.1)
+    love.graphics.rectangle("fill", buttonClear.x, buttonClear.y, buttonClear.width, buttonClear.height)
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.print(buttonClear.text, buttonClear.x + 75, buttonClear.y + 10, 0, 2)
 end
